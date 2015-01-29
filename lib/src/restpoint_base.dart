@@ -8,48 +8,76 @@ import 'package:http/http.dart';
 
 typedef Transformer(value);
 
+appendToUri(Uri uri, String append) {
+  var str = uri.toString();
+  str += str.endsWith('/') ? append : '/$append';
+  return Uri.parse(str);
+}
+
 @proxy
 class PathBuilder {
   Uri uri;
+  RestClient client;
   
-  PathBuilder(this.uri);
+  PathBuilder(this.uri, this.client);
   
-  PathBuilder id(id) => _resolve(id);
+  PathBuilder id(id) {
+    return _resolve(id.toString());
+  }
   
   PathBuilder _resolve(arg) {
-    if (arg is Symbol) arg = MirrorSystem.getName(arg);
-    var uri = this.uri.toString();
-    uri += uri.endsWith('/') ? arg : '/$arg';
-    this.uri = Uri.parse(uri);
+    if (arg is Symbol) {
+      arg = MirrorSystem.getName(arg);
+    }
+    uri = appendToUri(uri, arg);
     return this;
   }
   
-  PathBuilder noSuchMethod(Invocation invocation) {
+  String get lastResource => uri.toString().split("/").last;
+  
+  noSuchMethod(Invocation invocation) {
     if (invocation.isGetter) {
       return _resolve(invocation.memberName);
     }
-    throw new ArgumentError('Cannot resolve non-getters');
+    if (invocation.isMethod) {
+      _resolve(invocation.memberName);
+      var args = invocation.positionalArguments;
+      if (args.isEmpty)
+        return Function.apply(all, [], invocation.namedArguments);
+      if (1 == args.length)
+        return Function.apply(one, args, invocation.namedArguments);
+    }
+    throw new ArgumentError('Cannot resolve invocation');
+  }
+  
+  Future all({Map<String, dynamic> headers}) {
+    var resource = client.getResource(lastResource);
+    return resource.all(uri, headers: headers);
+  }
+  
+  Future one(id, {Map<String, dynamic> headers}) {
+    var resource = client.getResource(lastResource);
+    return resource.one(uri, headers: headers);
   }
 }
 
 @proxy
 class RestClient {
   final Uri baseUri;
-  Map<Symbol, Resource> resources = {};
+  Map<String, Resource> resources = {};
   
   RestClient(this.baseUri);
   
   noSuchMethod(Invocation invocation) {
     if (invocation.isGetter) {
-      if (null != resources[invocation.memberName])
-        return resources[invocation.memberName]._resolve(baseUri);
-      var name = MirrorSystem.getName(invocation.memberName);
-      return baseUri.resolve(name);
+      return new PathBuilder(baseUri, this)._resolve(invocation.memberName);
     }
   }
   
+  Resource getResource(String name) => resources[name];
+  
   void addResource(Resource resource) {
-    resources[new Symbol(resource.name)] = resource;
+    resources[resource.name] = resource;
   }
 }
 
@@ -59,8 +87,7 @@ class Resource {
   
   Resource(this.name, this.definition);
   
-  Future<List<Entity>> _all(Uri baseUri, {Map<String, dynamic> headers}) {
-    var uri = baseUri.resolve(name);
+  Future<List<Entity>> all(Uri uri, {Map<String, dynamic> headers}) {
     return get(uri, headers: headers).then((response) {
       checkResponse(response, 200);
       var entities = JSON.decode(response.body) as List<Map<String, dynamic>>;
@@ -70,8 +97,7 @@ class Resource {
   
   Uri _resolve(Uri base) => base.resolve(name);
   
-  Future<Entity> _one(Uri baseUri, id, {Map<String, dynamic> headers}) {
-    var uri = baseUri.resolve(name).resolve(id);
+  Future<Entity> one(Uri uri, {Map<String, dynamic> headers}) {
     return get(uri, headers: headers).then((response) {
       checkResponse(response, 200);
       var entity = JSON.decode(response.body) as Map<String, dynamic>;
@@ -111,12 +137,16 @@ class Entity {
   Entity(this._fields, this.parent);
   
   noSuchMethod(Invocation invocation) {
+    if (!_fields.containsKey(invocation.memberName))
+      return super.noSuchMethod(invocation);
     if (invocation.isGetter) return _fields[invocation.memberName];
     if (invocation.isMethod)
       return Function.apply(_fields[invocation.memberName],
                             [this]..addAll(invocation.positionalArguments),
                             invocation.namedArguments);
   }
+  
+  String toJson() => JSON.encode(parent.transformOut(this));
   
   operator [](Symbol key) => _fields[key];
 }

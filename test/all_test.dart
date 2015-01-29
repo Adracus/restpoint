@@ -3,22 +3,51 @@
 
 library restpoint.test;
 
+import 'dart:async' show Future;
+
+import 'mock/mocks.dart';
+
+import 'package:mock/mock.dart';
 import 'package:unittest/unittest.dart';
 import 'package:restpoint/restpoint.dart';
 
 main() {
   group("RestClient", () {
-    var uri = Uri.parse("http://www.example.org");
-    var client = new RestClient(uri);
-    print(client.users);
-    expect(client.users, equals(uri.resolve("users")));
   });
   
   group("PathBuilder", () {
-    var uri = Uri.parse("http://www.example.org");
-    var builder = new PathBuilder(uri);
-    var resolved = builder.users.id(1).notes;
-    expect(resolved.uri.toString(), "http://www.example.org/users/1/notes");
+    test("Uri building", () {
+      var uri = Uri.parse("http://www.example.org");
+      var builder = new PathBuilder(uri, null);
+      var resolved = builder.users.id(1).notes;
+      expect(resolved.uri.toString(), "http://www.example.org/users/1/notes");
+    });
+    
+    test("One", () {
+      var uri = Uri.parse("http://www.example.org");
+      var client = new RestClient(uri);
+      var resource = new ResourceMock("users");
+      resource.callbacks["one"] = (Uri uri, {Map<String, dynamic> headers}) =>
+          new Future.value("awesome");
+      client.addResource(resource);
+      
+      client.persons.users(12).then((value) {
+        expect(value, equals("awesome"));
+      });
+    });
+    
+    test("All", () {
+      var uri = Uri.parse("http://www.example.org");
+      var client = new RestClient(uri);
+      var resource = new ResourceMock("users");
+      resource.callbacks["all"] = (Uri uri, {Map<String, dynamic> headers}) =>
+          new Future.value("awesome");
+      client.addResource(resource);
+      
+      client.persons.users().then((value) {
+        expect(value, equals("awesome"));
+      });
+    });
   });
   
   group("ResourceBuilder", () {
