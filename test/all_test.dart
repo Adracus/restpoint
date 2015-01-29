@@ -17,23 +17,28 @@ main() {
   group("PathBuilder", () {
     test("Uri building", () {
       var uri = Uri.parse("http://www.example.org");
-      var builder = new PathBuilder(uri, null);
-      var resolved = builder.users.id(1).notes;
-      expect(resolved.uri.toString(), "http://www.example.org/users/1/notes");
+      var resolved1 = new PathBuilder(uri, null).users.id(1).notes;
+      var resolved2 = new PathBuilder(uri, null) / "users" / 1 / "notes";
+      var expectedUri = Uri.parse("http://www.example.org/users/1/notes");
+      expect(resolved1.uri, equals(expectedUri));
+      expect(resolved2.uri, equals(expectedUri));
     });
     
     test("One", () {
       var uri = Uri.parse("http://www.example.org");
       var client = new RestClient(uri);
       var resource = new ResourceMock("users");
-      resource.callbacks["one"] = (Uri uri, {Map<String, dynamic> headers}) =>
-          new Future.value("awesome");
+      resource.callbacks["one"] = (Uri uri, {Map<String, dynamic> headers}) {
+        expect(headers, equals({"a": 1}));
+        expect(uri.toString(), equals("http://www.example.org/persons/users/12"));
+        return new Future.value("awesome");
+      };
       client.addResource(resource);
       
-      client.persons.users(12).then(expectAsync((value) {
+      client.persons.users(12, headers: {"a": 1}).then(expectAsync((value) {
         expect(value, equals("awesome"));
       }));
-      client.persons.users.id(12).one().then(expectAsync((value) {
+      client.persons.users.id(12).one(headers: {"a": 1}).then(expectAsync((value) {
         expect(value, equals("awesome"));
       }));
     });
@@ -42,13 +47,20 @@ main() {
       var uri = Uri.parse("http://www.example.org");
       var client = new RestClient(uri);
       var resource = new ResourceMock("users");
-      resource.callbacks["all"] = (Uri uri, {Map<String, dynamic> headers}) =>
-          new Future.value("awesome");
+      var headers = {"a": 1};
+      resource.callbacks["all"] = (Uri uri, {Map<String, dynamic> headers}) {
+        expect(headers, equals(headers));
+        expect(uri.toString(), equals("http://www.example.org/persons/users"));
+        return new Future.value("awesome");
+      };
       client.addResource(resource);
       
-      client.persons.users().then((value) {
-        expect(value, equals("awesome"));
-      });
+      Future.wait([client.persons.users(headers: headers),
+                   client.persons.users.all(headers: headers),
+                   (client/"persons"/"users")(headers: headers)])
+      .then(expectAsync((values) {
+        values.forEach((value) => expect(value, equals("awesome")));
+      }));
     });
   });
   

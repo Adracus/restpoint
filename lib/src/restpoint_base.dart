@@ -34,7 +34,7 @@ class PathBuilder {
   }
   
   String get lastResource {
-    var segments = uri.path.split("/");
+    var segments = uri.pathSegments;
     if (null != client.getResource(segments.last)) return segments.last;
     if (segments.length == 1) throw new Exception("Could not resolve resource");
     var preLast = segments[segments.length - 2];
@@ -42,17 +42,22 @@ class PathBuilder {
     throw new Exception("Could not resolve resource");
   }
   
+  PathBuilder operator/(name) => slash(name.toString());
+  PathBuilder slash(name) => _resolve(name.toString());
+  
   noSuchMethod(Invocation invocation) {
     if (invocation.isGetter) {
       return _resolve(invocation.memberName);
     }
     if (invocation.isMethod) {
-      _resolve(invocation.memberName);
+      if (#call != invocation.memberName) _resolve(invocation.memberName);
       var args = invocation.positionalArguments;
-      if (args.isEmpty)
+      if (args.isEmpty) // All case
         return Function.apply(all, [], invocation.namedArguments);
-      if (1 == args.length)
+      if (1 == args.length) { // Id case
+        _resolve(args.single.toString());
         return Function.apply(one, [], invocation.namedArguments);
+      }
     }
     throw new ArgumentError('Cannot resolve invocation');
   }
@@ -65,6 +70,10 @@ class PathBuilder {
   Future one({Map<String, dynamic> headers}) {
     var resource = client.getResource(lastResource);
     return resource.one(uri, headers: headers);
+  }
+  
+  Future delete({Map<String, String> headers}) {
+    return client.delete(uri.path, headers: headers);
   }
 }
 
@@ -80,6 +89,9 @@ class RestClient {
       return new PathBuilder(baseUri, this)._resolve(invocation.memberName);
     }
   }
+  
+  PathBuilder operator/(name) => slash(name);
+  PathBuilder slash(name) => new PathBuilder(baseUri, this)._resolve(name.toString());
   
   Resource getResource(String name) => resources[name];
   
