@@ -1,10 +1,10 @@
 library restpoint.base;
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show JSON, Encoding;
 import 'dart:async' show Future;
 import 'dart:mirrors' show MirrorSystem;
 
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 
 typedef Transformer(value);
 
@@ -33,7 +33,14 @@ class PathBuilder {
     return this;
   }
   
-  String get lastResource => uri.toString().split("/").last;
+  String get lastResource {
+    var segments = uri.path.split("/");
+    if (null != client.getResource(segments.last)) return segments.last;
+    if (segments.length == 1) throw new Exception("Could not resolve resource");
+    var preLast = segments[segments.length - 2];
+    if (null != client.getResource(preLast)) return preLast;
+    throw new Exception("Could not resolve resource");
+  }
   
   noSuchMethod(Invocation invocation) {
     if (invocation.isGetter) {
@@ -45,7 +52,7 @@ class PathBuilder {
       if (args.isEmpty)
         return Function.apply(all, [], invocation.namedArguments);
       if (1 == args.length)
-        return Function.apply(one, args, invocation.namedArguments);
+        return Function.apply(one, [], invocation.namedArguments);
     }
     throw new ArgumentError('Cannot resolve invocation');
   }
@@ -55,7 +62,7 @@ class PathBuilder {
     return resource.all(uri, headers: headers);
   }
   
-  Future one(id, {Map<String, dynamic> headers}) {
+  Future one({Map<String, dynamic> headers}) {
     var resource = client.getResource(lastResource);
     return resource.one(uri, headers: headers);
   }
@@ -76,6 +83,19 @@ class RestClient {
   
   Resource getResource(String name) => resources[name];
   
+  Future<http.Response> put(String path, {Map<String, dynamic> body,
+    Map<String, String> headers: const {}}) =>
+        http.put(baseUri.resolve(path), body: JSON.encode(body),
+            headers: {"content-type": "application/json"}..addAll(headers));
+  
+  Future<http.Response> delete(String path, {Map<String, String> headers}) =>
+      http.delete(baseUri.resolve(path), headers: headers);
+  
+  Future<http.Response> post(String path, {Map<String, dynamic> body,
+    Map<String, String> headers: const{}}) =>
+        http.post(baseUri.resolve(path), body: JSON.encode(body),
+            headers: {"content-type": "application/json"}..addAll(headers));
+  
   void addResource(Resource resource) {
     resources[resource.name] = resource;
   }
@@ -88,7 +108,7 @@ class Resource {
   Resource(this.name, this.definition);
   
   Future<List<Entity>> all(Uri uri, {Map<String, dynamic> headers}) {
-    return get(uri, headers: headers).then((response) {
+    return http.get(uri, headers: headers).then((response) {
       checkResponse(response, 200);
       var entities = JSON.decode(response.body) as List<Map<String, dynamic>>;
       return entities.map(transformIn).toList();
@@ -98,7 +118,7 @@ class Resource {
   Uri _resolve(Uri base) => base.resolve(name);
   
   Future<Entity> one(Uri uri, {Map<String, dynamic> headers}) {
-    return get(uri, headers: headers).then((response) {
+    return http.get(uri, headers: headers).then((response) {
       checkResponse(response, 200);
       var entity = JSON.decode(response.body) as Map<String, dynamic>;
       return transformIn(entity);
@@ -284,7 +304,7 @@ class StatusException {
   String toString() => "Expected $expected but got $actual";
 }
 
-void checkResponse(Response response, int expected) {
+void checkResponse(http.Response response, int expected) {
   if (expected != response.statusCode)
     throw new StatusException(expected, response.statusCode);
 }

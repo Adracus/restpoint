@@ -7,7 +7,6 @@ import 'dart:async' show Future;
 
 import 'mock/mocks.dart';
 
-import 'package:mock/mock.dart';
 import 'package:unittest/unittest.dart';
 import 'package:restpoint/restpoint.dart';
 
@@ -31,9 +30,12 @@ main() {
           new Future.value("awesome");
       client.addResource(resource);
       
-      client.persons.users(12).then((value) {
+      client.persons.users(12).then(expectAsync((value) {
         expect(value, equals("awesome"));
-      });
+      }));
+      client.persons.users.id(12).one().then(expectAsync((value) {
+        expect(value, equals("awesome"));
+      }));
     });
     
     test("All", () {
