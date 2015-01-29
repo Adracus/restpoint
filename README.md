@@ -1,19 +1,3 @@
 # restpoint
 
-A library for Dart developers. It is awesome.
-
-## Usage
-
-A simple usage example:
-
-    import 'package:restpoint/restpoint.dart';
-
-    main() {
-      var awesome = new Awesome();
-    }
-
-## Features and bugs
-
-Please file feature requests and bugs at the [issue tracker][tracker].
-
-[tracker]: http://example.com/issues/replaceme
+[![Build Status](https://travis-ci.org/Adracus/restpoint.svg?branch=master)](https://travis-ci.org/Adracus/restpoint)
