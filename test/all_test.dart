@@ -18,28 +18,26 @@ main() {
     test("Uri building", () {
       var uri = Uri.parse("http://www.example.org");
       var resolved1 = new PathBuilder(uri, null).users.id(1).notes;
-      var resolved2 = new PathBuilder(uri, null) / "users" / 1 / "notes";
       var expectedUri = Uri.parse("http://www.example.org/users/1/notes");
       expect(resolved1.uri, equals(expectedUri));
-      expect(resolved2.uri, equals(expectedUri));
     });
     
     test("One", () {
       var uri = Uri.parse("http://www.example.org");
       var client = new RestClient(uri);
       var resource = new ResourceMock("users");
+      var headers = {"a": 1};
       resource.callbacks["one"] = (Uri uri, {Map<String, dynamic> headers}) {
-        expect(headers, equals({"a": 1}));
+        expect(headers, equals(headers));
         expect(uri.toString(), equals("http://www.example.org/persons/users/12"));
         return new Future.value("awesome");
       };
       client.addResource(resource);
       
-      client.persons.users(12, headers: {"a": 1}).then(expectAsync((value) {
-        expect(value, equals("awesome"));
-      }));
-      client.persons.users.id(12).one(headers: {"a": 1}).then(expectAsync((value) {
-        expect(value, equals("awesome"));
+      Future.wait([client.persons.users(12, headers: headers),
+                   client.persons.users.id(12).one(headers: headers)])
+      .then(expectAsync((values) {
+        values.forEach((value) => expect(value, equals("awesome")));
       }));
     });
     
@@ -56,8 +54,7 @@ main() {
       client.addResource(resource);
       
       Future.wait([client.persons.users(headers: headers),
-                   client.persons.users.all(headers: headers),
-                   (client/"persons"/"users")(headers: headers)])
+                   client.persons.users.all(headers: headers)])
       .then(expectAsync((values) {
         values.forEach((value) => expect(value, equals("awesome")));
       }));
@@ -67,7 +64,7 @@ main() {
   group("ResourceBuilder", () {
     group("build", () {
       test("simple", () {
-        var builder = new ResourceBuilder("users");
+        var builder = new ResourceBuilder(null, "users");
         var function = (Entity self) => null;
         builder.addMethod("myMethod", function);
         builder.addProperty("name");
@@ -84,7 +81,7 @@ main() {
     
     group("parse", () {
       group("Types only", () {
-        var builder = new ResourceBuilder("users");
+        var builder = new ResourceBuilder(null, "users");
         var function = (Entity self) => self.name + " and Olaf";
         builder.addMethod("myMethod", function);
         builder.addProperty("name");
@@ -151,10 +148,6 @@ main() {
           expect(parser(1), equals(1.0));
           expect(() => parser(new DateTime.now()), throws);
         });
-      });
-      
-      group("out", () {
-        
       });
     });
   });
