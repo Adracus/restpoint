@@ -1,6 +1,9 @@
 name: restpoint
 version: 0.0.1
-description: A library useful for applications or for sharing on pub.dartlang.org.
+author: Axel Christ <adracus@gmail.com>
+description: Develop rest interfaces like a breeze
+homepage: https://github.com/Adracus/restpoint
+documentation: https://github.com/Adracus/restpoint
 dependencies:
   http: any
   mock: any
