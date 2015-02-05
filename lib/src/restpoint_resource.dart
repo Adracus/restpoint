@@ -19,7 +19,7 @@ class Resource {
   
   Uri get resourceUri => appendToUri(client.baseUri, name);
   
-  Future<List<Entity>> all(Uri uri, {Map<String, dynamic> headers}) {
+  Future<List<Entity>> all(Uri uri, {Map<String, String> headers}) {
     return http.get(uri, headers: headers).then((response) {
       checkResponse(response, 200);
       var entities = JSON.decode(response.body) as List<Map<String, dynamic>>;
@@ -28,7 +28,7 @@ class Resource {
   }
   
   Future<Entity> create(Uri uri, {Map<String, dynamic> body,
-                                  Map<String, dynamic> headers}) {
+                                  Map<String, String> headers}) {
     return http.post(uri, headers: headers, body: body).then((response) {
       checkResponse(response, 201);
       var entity = JSON.decode(response.body) as Map<String, dynamic>;
@@ -36,7 +36,7 @@ class Resource {
     });
   }
   
-  Future delete(Uri uri, {Map<String, dynamic> headers}) {
+  Future delete(Uri uri, {Map<String, String> headers}) {
     return http.delete(uri, headers: headers).then((response) {
       checkResponse(response, 200);
       return;
@@ -44,7 +44,7 @@ class Resource {
   }
   
   Future update(Uri uri, {Map<String, dynamic> body,
-                          Map<String, dynamic> headers}) {
+                          Map<String, String> headers}) {
     return http.put(uri, body: body, headers: headers).then((response) {
       checkResponse(response, 200);
       var entity = JSON.decode(response.body) as Map<String, dynamic>;
@@ -54,7 +54,7 @@ class Resource {
   
   Uri _resolve(Uri base) => base.resolve(name);
   
-  Future<Entity> one(Uri uri, {Map<String, dynamic> headers}) {
+  Future<Entity> one(Uri uri, {Map<String, String> headers}) {
     return http.get(uri, headers: headers).then((response) {
       checkResponse(response, 200);
       var entity = JSON.decode(response.body) as Map<String, dynamic>;

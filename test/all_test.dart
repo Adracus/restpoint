@@ -27,7 +27,7 @@ main() {
       var client = new RestClient(uri);
       var resource = new ResourceMock("users");
       var headers = {"a": 1};
-      resource.callbacks["one"] = (Uri uri, {Map<String, dynamic> headers}) {
+      resource.callbacks["one"] = (Uri uri, {Map<String, String> headers}) {
         expect(headers, equals(headers));
         expect(uri.toString(), equals("http://www.example.org/persons/users/12"));
         return new Future.value("awesome");
@@ -46,7 +46,7 @@ main() {
       var client = new RestClient(uri);
       var resource = new ResourceMock("users");
       var headers = {"a": 1};
-      resource.callbacks["all"] = (Uri uri, {Map<String, dynamic> headers}) {
+      resource.callbacks["all"] = (Uri uri, {Map<String, String> headers}) {
         expect(headers, equals(headers));
         expect(uri.toString(), equals("http://www.example.org/persons/users"));
         return new Future.value("awesome");

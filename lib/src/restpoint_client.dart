@@ -21,7 +21,6 @@ class RestClient {
     }
   }
   
-  PathBuilder operator/(name) => slash(name);
   PathBuilder slash(name) => new PathBuilder(baseUri, this).resolve(name.toString());
   
   Resource getResource(String name) => resources[name];
@@ -38,6 +37,9 @@ class RestClient {
     Map<String, String> headers: const{}}) =>
         http.post(baseUri.resolve(path), body: JSON.encode(body),
             headers: {"content-type": "application/json"}..addAll(headers));
+  
+  Future<http.Response> get(String path, {Map<String, String> headers}) =>
+      http.get(baseUri.resolve(path), headers: headers);
   
   void addResource(Resource resource) {
     resources[resource.name] = resource;

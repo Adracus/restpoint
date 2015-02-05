@@ -1,6 +1,9 @@
 library restpoint.structure;
 
+import 'dart:async' show Future;
+
 import 'restpoint_resource.dart';
+import 'restpoint_http.dart';
 
 typedef Transformer(value);
 
@@ -19,6 +22,20 @@ class Entity {
       return Function.apply(_fields[invocation.memberName],
                             [this]..addAll(invocation.positionalArguments),
                             invocation.namedArguments);
+  }
+  
+  Future<Entity> full({String uriAddition, Map<String, dynamic> headers}) {
+    var uri = parent.resourceUri;
+    if (null != uriAddition) uri = appendToUri(uri, uriAddition);
+    return parent.one(uri, headers: headers);
+  }
+  
+  Future delete({String uriAddition, String idName: "id",
+                 Map<String, dynamic> headers}) {
+    var uri = parent.resourceUri;
+    if (null != uriAddition) uri = appendToUri(uri, uriAddition);
+    uri = appendToUri(uri, _fields[new Symbol(idName)]);
+    return parent.delete(uri, headers: headers);
   }
   
   String toJson() => JSON.encode(parent.transformOut(this));
