@@ -24,6 +24,8 @@ class Entity {
                             invocation.namedArguments);
   }
   
+  get(String name) => _fields[new Symbol(name)];
+  
   Future<Entity> full({String uriAddition, Map<String, dynamic> headers}) {
     var uri = parent.resourceUri;
     if (null != uriAddition) uri = appendToUri(uri, uriAddition);
