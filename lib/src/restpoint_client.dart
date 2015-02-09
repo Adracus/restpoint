@@ -27,19 +27,19 @@ class RestClient {
   
   Future<http.Response> put(String path, {Map<String, dynamic> body,
     Map<String, String> headers}) =>
-        http.put(baseUri.resolve(path), body: JSON.encode(body),
+        http.put(appendToUri(baseUri, path), body: JSON.encode(body),
             headers: appendToHeaders({"content-type": "application/json"}, headers));
   
   Future<http.Response> delete(String path, {Map<String, String> headers}) =>
-      http.delete(baseUri.resolve(path), headers: headers);
+      http.delete(appendToUri(baseUri, path), headers: headers);
   
   Future<http.Response> post(String path, {Map<String, dynamic> body,
     Map<String, String> headers}) =>
-        http.post(baseUri.resolve(path), body: JSON.encode(body),
+        http.post(appendToUri(baseUri, path), body: JSON.encode(body),
             headers: appendToHeaders({"content-type": "application/json"}, headers));
   
   Future<http.Response> get(String path, {Map<String, String> headers}) =>
-      http.get(baseUri.resolve(path), headers: headers);
+      http.get(appendToUri(baseUri, path), headers: headers);
   
   void addResource(Resource resource) {
     resources[resource.name] = resource;
