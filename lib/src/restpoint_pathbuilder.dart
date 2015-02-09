@@ -5,6 +5,7 @@ import 'dart:mirrors' show MirrorSystem;
 
 import 'restpoint_client.dart';
 import 'restpoint_http.dart';
+import 'restpoint_structure.dart' show Entity;
 
 
 @proxy
@@ -54,17 +55,22 @@ class PathBuilder {
     throw new ArgumentError('Cannot resolve invocation');
   }
   
-  Future all({Map<String, dynamic> headers}) {
+  Future<Entity> all({Map<String, dynamic> headers}) {
     var resource = client.getResource(lastResource);
     return resource.all(uri, headers: headers);
   }
   
-  Future one({Map<String, dynamic> headers}) {
+  Future<Entity> one({Map<String, dynamic> headers}) {
     var resource = client.getResource(lastResource);
     return resource.one(uri, headers: headers);
   }
   
   Future delete({Map<String, String> headers}) {
     return client.delete(uri.path, headers: headers);
+  }
+  
+  Future<Entity> create({Map<String, dynamic> body, Map<String, dynamic> headers}) {
+    var resource = client.getResource(lastResource);
+    return resource.create(uri, body: body, headers: headers);
   }
 }
