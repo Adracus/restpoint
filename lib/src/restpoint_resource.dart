@@ -30,7 +30,7 @@ class Resource {
   Future<Entity> create(Uri uri, {Map<String, dynamic> body,
                                   Map<String, String> headers}) {
     return http.post(uri,
-        headers: {"content-type": "application/json"}..addAll(headers),
+        headers: appendToHeaders({"content-type": "application/json"}, headers),
         body: JSON.encode(body))
         .then((response) {
           checkResponse(response, 201);
@@ -49,7 +49,7 @@ class Resource {
   Future update(Uri uri, {Map<String, dynamic> body,
                           Map<String, String> headers}) {
     return http.put(uri,
-        headers: {"content-type": "application/json"}..addAll(headers),
+        headers: appendToHeaders({"content-type": "application/json"}, headers),
         body: JSON.encode(body))
         .then((response) {
           checkResponse(response, 200);
