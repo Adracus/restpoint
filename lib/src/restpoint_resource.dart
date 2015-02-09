@@ -93,20 +93,27 @@ class ResourceBuilder {
   
   ResourceBuilder(this.client, this._name);
   
-  void addField(Field field) {
+  ResourceBuilder addField(Field field) {
     _fields[field.name] = field;
+    return this;
   }
   
-  void addTypedProperty(String name, {type: String}) =>
-      addField(new Property.typed(name, type: type));
+  ResourceBuilder addTypedProperty(String name, {type: String}) {
+    addField(new Property.typed(name, type: type));
+    return this;
+  }
   
-  void addProperty(String name, {Transformer inTransformer,
-    Transformer outTransformer}) =>
-        addField(new Property(name, inTransformer: inTransformer,
-                                    outTransformer: outTransformer));
+  ResourceBuilder addProperty(String name, {Transformer inTransformer,
+    Transformer outTransformer}) {
+      addField(new Property(name, inTransformer: inTransformer,
+                                  outTransformer: outTransformer));
+      return this;
+  }
   
-  void addMethod(String name, Function function) =>
-      addField(new Method(name, function));
+  ResourceBuilder addMethod(String name, Function function) {
+    addField(new Method(name, function));
+    return this;
+  }
   
   Resource build() {
     var definition = new Definition(_fields);
