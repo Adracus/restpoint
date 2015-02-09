@@ -55,7 +55,7 @@ class PathBuilder {
     throw new ArgumentError('Cannot resolve invocation');
   }
   
-  Future<Entity> all({Map<String, dynamic> headers}) {
+  Future<List<Entity>> all({Map<String, dynamic> headers}) {
     var resource = client.getResource(lastResource);
     return resource.all(uri, headers: headers);
   }
