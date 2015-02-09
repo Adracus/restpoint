@@ -16,9 +16,7 @@ class RestClient {
   RestClient(this.baseUri);
   
   noSuchMethod(Invocation invocation) {
-    if (invocation.isGetter) {
-      return new PathBuilder(baseUri, this).resolve(invocation.memberName);
-    }
+    return new PathBuilder(baseUri, this).noSuchMethod(invocation);
   }
   
   PathBuilder slash(name) => new PathBuilder(baseUri, this).resolve(name.toString());
