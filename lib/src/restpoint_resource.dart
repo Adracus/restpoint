@@ -29,10 +29,13 @@ class Resource {
   
   Future<Entity> create(Uri uri, {Map<String, dynamic> body,
                                   Map<String, String> headers}) {
-    return http.post(uri, headers: headers, body: body).then((response) {
-      checkResponse(response, 201);
-      var entity = JSON.decode(response.body) as Map<String, dynamic>;
-      return transformIn(entity);
+    return http.post(uri,
+        headers: {"content-type": "application/json"}..addAll(headers),
+        body: JSON.encode(body))
+        .then((response) {
+          checkResponse(response, 201);
+          var entity = JSON.decode(response.body);
+          return transformIn(entity);
     });
   }
   
@@ -45,10 +48,13 @@ class Resource {
   
   Future update(Uri uri, {Map<String, dynamic> body,
                           Map<String, String> headers}) {
-    return http.put(uri, body: body, headers: headers).then((response) {
-      checkResponse(response, 200);
-      var entity = JSON.decode(response.body) as Map<String, dynamic>;
-      return transformIn(entity);
+    return http.put(uri,
+        headers: {"content-type": "application/json"}..addAll(headers),
+        body: JSON.encode(body))
+        .then((response) {
+          checkResponse(response, 200);
+          var entity = JSON.decode(response.body);
+          return transformIn(entity);
     });
   }
   

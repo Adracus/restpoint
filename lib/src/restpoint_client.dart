@@ -1,6 +1,7 @@
 library restpoint.client;
 
 import 'dart:async' show Future;
+import 'dart:convert' show JSON;
 
 import 'restpoint_pathbuilder.dart';
 import 'restpoint_resource.dart' show Resource;
