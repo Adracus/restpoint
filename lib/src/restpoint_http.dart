@@ -1,6 +1,11 @@
 library restpoint.http;
 
-import 'package:http/http.dart' as http;
+import 'dart:convert' show Encoding;
+import 'dart:async' show Future;
+
+import 'package:http/http.dart' show Response, Client;
+
+export 'package:http/http.dart' show Response;
 
 
 Uri appendToUri(Uri uri, String append) {
@@ -18,7 +23,7 @@ Map<String, String> appendToHeaders(Map<String, String> headers,
 
 class StatusException {
   final int expected;
-  final http.Response response;
+  final Response response;
   
   const StatusException(this.expected, this.response);
   
@@ -27,7 +32,35 @@ class StatusException {
   String toString() => "Expected $expected but got $actual";
 }
 
-void checkResponse(http.Response response, int expected) {
+void checkResponse(Response response, int expected) {
   if (expected != response.statusCode)
     throw new StatusException(expected, response);
+}
+
+abstract class ClientFactory {
+  Future<Response> get(url, {Map<String, String> headers}) {
+    var client = createClient();
+    return client.get(url, headers: headers)
+                 .whenComplete(() => client.close());
+  }
+  
+  Future<Response> post(url, {Map<String, String> headers, body, Encoding encoding}) {
+    var client = createClient();
+    return client.post(url, headers: headers, body: body, encoding: encoding)
+                 .whenComplete(() => client.close());
+  }
+  
+  Future<Response> delete(url, {Map<String, String> headers}) {
+    var client = createClient();
+    return client.delete(url, headers: headers)
+                 .whenComplete(() => client.close());
+  }
+  
+  Future<Response> put(url, {Map<String, String> headers, body, Encoding encoding}) {
+    var client = createClient();
+    return client.put(url, headers: headers, body: body, encoding: encoding)
+                 .whenComplete(() => client.close());
+  }
+  
+  Client createClient();
 }

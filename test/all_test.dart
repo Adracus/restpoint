@@ -3,9 +3,6 @@
 
 library restpoint.test;
 
-import 'dart:async' show Future;
-
-import 'mock/mocks.dart';
 import 'restpoint_pathbuilder_test.dart' as pathbuilder;
 
 import 'package:unittest/unittest.dart';

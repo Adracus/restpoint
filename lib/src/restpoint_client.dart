@@ -7,15 +7,14 @@ import 'restpoint_http.dart';
 import 'restpoint_pathbuilder.dart';
 import 'restpoint_resource.dart' show Resource;
 
-import 'package:http/http.dart' as http;
-
 
 @proxy
 class RestClient {
   final Uri baseUri;
+  final ClientFactory http;
   Map<String, Resource> resources = {};
   
-  RestClient(this.baseUri);
+  RestClient(this.baseUri, this.http);
   
   noSuchMethod(Invocation invocation) {
     return new PathBuilder(baseUri, this).noSuchMethod(invocation);
@@ -25,20 +24,20 @@ class RestClient {
   
   Resource getResource(String name) => resources[name];
   
-  Future<http.Response> put(String path, {Map<String, dynamic> body,
+  Future<Response> put(String path, {Map<String, dynamic> body,
     Map<String, String> headers}) =>
         http.put(appendToUri(baseUri, path), body: JSON.encode(body),
             headers: appendToHeaders({"content-type": "application/json"}, headers));
   
-  Future<http.Response> delete(String path, {Map<String, String> headers}) =>
+  Future<Response> delete(String path, {Map<String, String> headers}) =>
       http.delete(appendToUri(baseUri, path), headers: headers);
   
-  Future<http.Response> post(String path, {Map<String, dynamic> body,
+  Future<Response> post(String path, {Map<String, dynamic> body,
     Map<String, String> headers}) =>
         http.post(appendToUri(baseUri, path), body: JSON.encode(body),
             headers: appendToHeaders({"content-type": "application/json"}, headers));
   
-  Future<http.Response> get(String path, {Map<String, String> headers}) =>
+  Future<Response> get(String path, {Map<String, String> headers}) =>
       http.get(appendToUri(baseUri, path), headers: headers);
   
   void addResource(Resource resource) {

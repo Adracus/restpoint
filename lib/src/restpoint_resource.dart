@@ -7,8 +7,6 @@ import 'restpoint_http.dart';
 import 'restpoint_structure.dart';
 import 'restpoint_client.dart' show RestClient;
 
-import 'package:http/http.dart' as http;
-
 
 class Resource {
   final String name;
@@ -18,6 +16,8 @@ class Resource {
   Resource(this.client, this.name, this.definition);
   
   Uri get resourceUri => appendToUri(client.baseUri, name);
+  
+  ClientFactory get http => client.http;
   
   Future<List<Entity>> all(Uri uri, {Map<String, String> headers}) {
     return http.get(uri, headers: headers).then((response) {

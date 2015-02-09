@@ -4,8 +4,8 @@ import 'dart:async' show Future;
 
 import 'mock/mocks.dart';
 
+import 'package:restpoint/restpoint_server_client.dart';
 import 'package:restpoint/restpoint.dart';
-
 import 'package:unittest/unittest.dart';
 
 
@@ -23,7 +23,7 @@ defineTests() {
     group("One", () {
       test("Zero level", () {
         var uri = Uri.parse("http://www.example.org");
-        var client = new RestClient(uri);
+        var client = new RestClient(uri, new ServerClientFactory());
         var resource = new ResourceMock("users");
         var headers = {"a": 1};
         resource.callbacks["one"] = (Uri uri, {Map<String, String> headers}) {
@@ -38,7 +38,7 @@ defineTests() {
       
       test("nested", () {
         var uri = Uri.parse("http://www.example.org");
-        var client = new RestClient(uri);
+        var client = new RestClient(uri, new ServerClientFactory());
         var resource = new ResourceMock("users");
         var headers = {"a": 1};
         resource.callbacks["one"] = (Uri uri, {Map<String, String> headers}) {
@@ -59,7 +59,7 @@ defineTests() {
     group("All", () {
       test("nested", () {
         var uri = Uri.parse("http://www.example.org");
-        var client = new RestClient(uri);
+        var client = new RestClient(uri, new ServerClientFactory());
         var resource = new ResourceMock("users");
         var headers = {"a": 1};
         resource.callbacks["all"] = (Uri uri, {Map<String, String> headers}) {
@@ -78,7 +78,7 @@ defineTests() {
       
       test("simple", () {
         var uri = Uri.parse("http://www.example.org");
-        var client = new RestClient(uri);
+        var client = new RestClient(uri, new ServerClientFactory());
         var resource = new ResourceMock("users");
         var headers = {"a": 1};
         resource.callbacks["all"] = (Uri uri, {Map<String, String> headers}) {
@@ -99,7 +99,7 @@ defineTests() {
     group("delete", () {
       test("simple", () {
         var uri = Uri.parse("http://www.example.org");
-        var client = new RestClient(uri);
+        var client = new RestClient(uri, new ServerClientFactory());
         var resource = new ResourceMock("users");
         var headers = {"a": 1};
         resource.callbacks["delete"] = (Uri uri, {Map<String, String> headers}) {
@@ -116,7 +116,7 @@ defineTests() {
       
       test("nested", () {
         var uri = Uri.parse("http://www.example.org");
-        var client = new RestClient(uri);
+        var client = new RestClient(uri, new ServerClientFactory());
         var resource = new ResourceMock("users");
         var headers = {"a": 1};
         resource.callbacks["delete"] = (Uri uri, {Map<String, String> headers}) {
