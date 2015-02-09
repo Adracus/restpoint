@@ -52,7 +52,7 @@ class Resource {
         headers: appendToHeaders({"content-type": "application/json"}, headers),
         body: JSON.encode(body))
         .then((response) {
-          checkResponse(response, 200);
+          checkResponse(response, 204);
           var entity = JSON.decode(response.body);
           return transformIn(entity);
     });
