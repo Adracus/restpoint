@@ -1,6 +1,7 @@
 library restpoint.structure;
 
 import 'dart:async' show Future;
+import 'dart:mirrors' show MirrorSystem;
 
 import 'restpoint_resource.dart';
 import 'restpoint_http.dart';
@@ -41,6 +42,16 @@ class Entity {
   }
   
   String toJson() => JSON.encode(parent.transformOut(this));
+  
+  String toString() {
+    if (_fields[#toString] is Function) return _fields[#toString](this);
+    var result = [];
+    _fields.forEach((name, value) {
+      if (value is! Function)
+        result.add(MirrorSystem.getName(name) + " " + value.toString());
+    });
+    return result.join("\n");
+  }
   
   operator [](Symbol key) => _fields[key];
 }

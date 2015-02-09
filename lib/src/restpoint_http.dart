@@ -18,14 +18,16 @@ Map<String, String> appendToHeaders(Map<String, String> headers,
 
 class StatusException {
   final int expected;
-  final int actual;
+  final http.Response response;
   
-  const StatusException(this.expected, this.actual);
+  const StatusException(this.expected, this.response);
+  
+  int get actual => response.statusCode;
   
   String toString() => "Expected $expected but got $actual";
 }
 
 void checkResponse(http.Response response, int expected) {
   if (expected != response.statusCode)
-    throw new StatusException(expected, response.statusCode);
+    throw new StatusException(expected, response);
 }
