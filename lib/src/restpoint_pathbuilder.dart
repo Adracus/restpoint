@@ -66,7 +66,8 @@ class PathBuilder {
   }
   
   Future delete({Map<String, String> headers}) {
-    return client.delete(uri.path, headers: headers);
+    var resource = client.getResource(lastResource);
+    return resource.delete(uri, headers: headers);
   }
   
   Future<Entity> create({Map<String, dynamic> body, Map<String, dynamic> headers}) {

@@ -17,4 +17,7 @@ class ResourceMock extends Mock implements Resource {
   
   Future all(Uri uri, {Map<String, dynamic> headers}) =>
       Function.apply(callbacks["all"], [uri], {#headers: headers});
+  
+  Future delete(Uri uri, {Map<String, dynamic> headers}) =>
+      Function.apply(callbacks["delete"], [uri], {#headers: headers});
 }
