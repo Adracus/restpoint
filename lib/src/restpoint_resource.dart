@@ -41,7 +41,7 @@ class Resource {
   
   Future delete(Uri uri, {Map<String, String> headers}) {
     return http.delete(uri, headers: headers).then((response) {
-      checkResponse(response, 200);
+      checkResponse(response, 204);
       return;
     });
   }
@@ -52,7 +52,7 @@ class Resource {
         headers: appendToHeaders({"content-type": "application/json"}, headers),
         body: JSON.encode(body))
         .then((response) {
-          checkResponse(response, 204);
+          checkResponse(response, 200);
           var entity = JSON.decode(response.body);
           return transformIn(entity);
     });
