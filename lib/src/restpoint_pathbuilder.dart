@@ -74,4 +74,14 @@ class PathBuilder {
     var resource = client.getResource(lastResource);
     return resource.create(uri, body: body, headers: headers);
   }
+  
+  Future<Entity> patch({Map<String, dynamic> body, Map<String, dynamic> headers}) {
+    var resource = client.getResource(lastResource);
+    return resource.patch(uri, body: body, headers: headers);
+  }
+  
+  Future<Entity> update({Map<String, dynamic> body, Map<String, dynamic> headers}) {
+    var resource = client.getResource(lastResource);
+    return resource.update(uri, body: body, headers: headers);
+  }
 }
