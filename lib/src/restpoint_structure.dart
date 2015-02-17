@@ -27,6 +27,8 @@ class Entity {
   
   get(String name) => _fields[new Symbol(name)];
   
+  bool containsKey(String key) => _fields.containsKey(new Symbol(key));
+  
   Future<Entity> full({String uriAddition, Map<String, dynamic> headers}) {
     var uri = parent.resourceUri;
     if (null != uriAddition) uri = appendToUri(uri, uriAddition);

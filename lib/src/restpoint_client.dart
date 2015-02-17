@@ -3,6 +3,8 @@ library restpoint.client;
 import 'dart:async' show Future;
 import 'dart:convert' show JSON;
 
+import 'package:http/http.dart';
+
 import 'restpoint_http.dart';
 import 'restpoint_pathbuilder.dart';
 import 'restpoint_resource.dart' show Resource;
@@ -35,6 +37,11 @@ class RestClient {
   Future<Response> post(String path, {Map<String, dynamic> body,
     Map<String, String> headers}) =>
         http.post(appendToUri(baseUri, path), body: JSON.encode(body),
+            headers: appendToHeaders({"content-type": "application/json"}, headers));
+  
+  Future<Response> patch(String path, {Map<String, dynamic> body,
+    Map<String, String> headers}) =>
+        http.patch(appendToUri(baseUri, path), body: JSON.encode(body),
             headers: appendToHeaders({"content-type": "application/json"}, headers));
   
   Future<Response> get(String path, {Map<String, String> headers}) =>

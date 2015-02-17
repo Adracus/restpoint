@@ -58,6 +58,18 @@ class Resource {
     });
   }
   
+  Future patch(Uri uri, {Map<String, dynamic> body,
+                            Map<String, String> headers}) {
+    return http.patch(uri,
+        headers: appendToHeaders({"content-type": "application/json"}, headers),
+        body: JSON.encode(body))
+        .then((response) {
+          checkResponse(response, 200);
+          var entity = JSON.decode(response.body);
+          return transformIn(entity);
+    });
+  }
+  
   Uri _resolve(Uri base) => base.resolve(name);
   
   Future<Entity> one(Uri uri, {Map<String, String> headers}) {

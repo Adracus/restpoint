@@ -3,7 +3,8 @@ library restpoint.http;
 import 'dart:convert' show Encoding;
 import 'dart:async' show Future;
 
-import 'package:http/http.dart' show Response, Client;
+import 'package:http/http.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 export 'package:http/http.dart' show Response;
 
@@ -61,6 +62,34 @@ abstract class ClientFactory {
     return client.put(url, headers: headers, body: body, encoding: encoding)
                  .whenComplete(() => client.close());
   }
+  
+  Future<Response> patch(url, {body, Map<String, String> headers, Encoding encoding}) {
+    var client = createClient();
+    return syncFuture(() {
+      if (url is String) url = Uri.parse(url);
+      var request = new Request("PATCH", url);
+
+      if (headers != null) request.headers.addAll(headers);
+      if (encoding != null) request.encoding = encoding;
+      if (body != null) {
+        if (body is String) {
+          request.body = body;
+        } else if (body is List) {
+          request.bodyBytes = body;
+        } else if (body is Map) {
+          request.bodyFields = body;
+        } else {
+          throw new ArgumentError('Invalid request body "$body".');
+        }
+      }
+
+      return client.send(request);
+    }).then(Response.fromStream)
+      .whenComplete(() => client.close());
+  }
+  
+  /// Like [Future.sync], but wraps the Future in [Chain.track] as well.
+  Future syncFuture(callback()) => Chain.track(new Future.sync(callback));
   
   Client createClient();
 }
